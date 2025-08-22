@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoveWords - 专属浪漫表白</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: radial-gradient(circle at 50% 50%, #ff6b9d, #c44569, #6c5ce7, #a29bfe);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .title {
+            color: white;
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(255,107,157,0.6);
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            from { text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(255,107,157,0.6); }
+            to { text-shadow: 0 0 30px rgba(255,255,255,1), 0 0 60px rgba(255,107,157,0.8), 0 0 80px rgba(255,107,157,0.4); }
+        }
+        
+        .input-section {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(20px);
+            padding: 3rem;
+            border-radius: 30px;
+            margin-bottom: 2rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.4);
+            animation: floatUp 3s ease-in-out infinite;
+        }
+        
+        @keyframes floatUp {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .name-input {
+            padding: 20px 25px;
+            font-size: 1.4rem;
+            border: none;
+            border-radius: 50px;
+            width: 350px;
+            text-align: center;
+            margin-bottom: 0;
+            outline: none;
+            background: rgba(255,255,255,0.95);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2), inset 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .name-input:focus {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(255,107,157,0.4), inset 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .generate-btn {
+            padding: 20px 40px;
+            font-size: 1.3rem;
+            background: linear-gradient(45deg, #ff6b9d, #c44569, #6c5ce7);
+            background-size: 200% 200%;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 15px 40px rgba(255,107,157,0.5);
+            transition: all 0.3s ease;
+            animation: btnGlow 2s ease-in-out infinite alternate;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-top: 1.5rem;
+        }
+        
+        @keyframes btnGlow {
+            from { background-position: 0% 50%; }
+            to { background-position: 100% 50%; }
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-8px) scale(1.08);
+            box-shadow: 0 25px 60px rgba(255,107,157,0.7);
+        }
+        
+        .generate-btn:active {
+            transform: translateY(-3px) scale(1.02);
+        }
+        
+        .effect-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .love-message {
+            background: rgba(255,255,255,0.95);
+            padding: 3rem;
+            border-radius: 25px;
+            max-width: 700px;
+            text-align: center;
+            margin: 2rem 0;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 100px rgba(255,107,157,0.3);
+            border: 2px solid rgba(255,255,255,0.5);
+            display: none;
+            animation: messageAppear 1.5s ease-out;
+        }
+        
+        @keyframes messageAppear {
+            0% { opacity: 0; transform: scale(0.5) rotateY(180deg); }
+            50% { opacity: 0.7; transform: scale(1.1) rotateY(90deg); }
+            100% { opacity: 1; transform: scale(1) rotateY(0deg); }
+        }
+        
+        .message-text {
+            font-size: 1.5rem;
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .share-section {
+            display: none;
+            margin-top: 2rem;
+        }
+        
+        .share-btn {
+            padding: 12px 25px;
+            margin: 0 8px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .share-btn.copy { 
+            background: linear-gradient(45deg, #3498db, #2980b9); 
+            color: white; 
+        }
+        .share-btn.save { 
+            background: linear-gradient(45deg, #2ecc71, #27ae60); 
+            color: white; 
+        }
+        .share-btn.regenerate {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        
+        .share-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        
+        .firework {
+            position: absolute;
+            pointer-events: none;
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            animation: starTwinkle 2s ease-in-out infinite;
+        }
+        
+        @keyframes starTwinkle {
+            0%, 100% { opacity: 0.3; transform: scale(0.8) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+        }
+        
+        .floating-heart {
+            position: absolute;
+            font-size: 30px;
+            color: #ff6b9d;
+            animation: floatHeart 4s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes floatHeart {
+            0% { transform: translateY(100vh) rotate(0deg) scale(0); opacity: 0; }
+            10% { opacity: 1; transform: translateY(90vh) rotate(36deg) scale(1); }
+            90% { opacity: 1; transform: translateY(-10vh) rotate(324deg) scale(1); }
+            100% { transform: translateY(-20vh) rotate(360deg) scale(0); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="effect-canvas" id="effectCanvas"></canvas>
+    
+    <div class="container">
+        <h1 class="title">💕 LoveWords 💕</h1>
+        
+        <div class="input-section">
+            <input type="text" class="name-input" id="nameInput" placeholder="输入TA的名字..." maxlength="10">
+            <button class="generate-btn" onclick="generateLoveMessage()">生成专属表白</button>
+        </div>
+        
+        <div class="love-message" id="loveMessage">
+            <div class="message-text" id="messageText"></div>
+            <div class="share-section" id="shareSection">
+                <button class="share-btn copy" onclick="copyLink()">复制链接</button>
+                <button class="share-btn save" onclick="saveAsImage()">保存图片</button>
+                <button class="share-btn regenerate" onclick="regenerateMessage()">重新生成</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 预设的浪漫文案模板
+        const loveTemplates = [
+            "亲爱的{name}，你是我生命中最美的意外，愿与你共度每一个春夏秋冬。💖",
+            "{name}，遇见你是我最大的幸运，愿我们的爱情如星辰般永恒闪耀。✨",
+            "我想对{name}说：你的笑容是我见过最美的风景，愿意做你永远的守护者。🌹",
+            "{name}，你就像夜空中最亮的星，指引着我前进的方向。🌟",
+            "亲爱的{name}，如果爱情有颜色，那一定是你眼中的温柔。💕",
+            "{name}，愿我们的爱情像诗一样美好，像歌一样动听。🎵",
+            "对{name}的爱，就像春天的花朵，永远绽放在我心中。🌸",
+            "{name}，你是我心中的唯一，愿与你携手走过人生的每一个阶段。💑"
+        ];
+
+        // 基于姓名生成个性化颜色
+        function generateColor(name) {
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const hue = Math.abs(hash) % 360;
+            return `hsl(${hue}, 80%, 65%)`;
+        }
+
+        // 创建烟花爆炸效果
+        function createFirework(x, y, color) {
+            const particles = [];
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10,
+                    life: 1,
+                    decay: Math.random() * 0.02 + 0.01,
+                    size: Math.random() * 4 + 2,
+                    color: color
+                });
+            }
+            return particles;
+        }
+
+        // 创建飘落的爱心
+        function createFloatingHearts() {
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'floating-heart';
+                    heart.innerHTML = ['💖', '💕', '💗', '💝', '💘'][Math.floor(Math.random() * 5)];
+                    heart.style.left = Math.random() * 100 + 'vw';
+                    heart.style.animationDelay = Math.random() * 2 + 's';
+                    heart.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                    document.body.appendChild(heart);
+                    
+                    setTimeout(() => heart.remove(), 8000);
+                }, i * 200);
+            }
+        }
+
+        // 创建星星背景
+        function createStars() {
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + 'vw';
+                star.style.top = Math.random() * 100 + 'vh';
+                star.style.width = Math.random() * 4 + 2 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 2 + 's';
+                star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                document.body.appendChild(star);
+            }
+        }
+
+        // 炸裂特效生成（响应式优化）
+        function generateEffect() {
+            const name = document.getElementById('nameInput').value.trim();
+            if (!name) {
+                alert('请先输入TA的名字！');
+                return;
+            }
+
+            const canvas = document.getElementById('effectCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const hearts = [];
+            const fireworks = [];
+            const isMobile = window.innerWidth < 768;
+            const heartCount = name.length * (isMobile ? 10 : 15);
+            const color = generateColor(name);
+            const colors = [color, '#ff6b9d', '#c44569', '#6c5ce7', '#a29bfe', '#fd79a8'];
+
+            // 创建多种粒子效果（移动端优化）
+            for (let i = 0; i < heartCount; i++) {
+                hearts.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * (isMobile ? 20 : 30) + (isMobile ? 10 : 15),
+                    speedX: (Math.random() - 0.5) * (isMobile ? 4 : 6),
+                    speedY: (Math.random() - 0.5) * (isMobile ? 4 : 6),
+                    opacity: Math.random() * 0.8 + 0.2,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * (isMobile ? 3 : 5),
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    pulse: Math.random() * Math.PI * 2
+                });
+            }
+
+            // 创建烟花效果（性能优化）
+            function addFirework() {
+                if (fireworks.length > (isMobile ? 50 : 100)) return;
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height * 0.7;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                fireworks.push(...createFirework(x, y, color));
+            }
+
+            // 绘制增强版爱心
+            function drawEnhancedHeart(ctx, x, y, size, color, opacity, rotation) {
+                ctx.save();
+                ctx.globalAlpha = opacity;
+                ctx.translate(x, y);
+                ctx.rotate(rotation * Math.PI / 180);
+                
+                // 添加发光效果
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 20;
+                ctx.fillStyle = color;
+                
+                ctx.scale(size / 20, size / 20);
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.bezierCurveTo(-10, -10, -20, 0, -10, 10);
+                ctx.bezierCurveTo(0, 20, 0, 20, 0, 20);
+                ctx.bezierCurveTo(0, 20, 0, 20, 10, 10);
+                ctx.bezierCurveTo(20, 0, 10, -10, 0, 0);
+                ctx.fill();
+                
+                // 添加内部高光
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.scale(0.6, 0.6);
+                ctx.fill();
+                
+                ctx.restore();
+            }
+
+            // 绘制烟花粒子
+            function drawFireworkParticle(ctx, particle) {
+                ctx.save();
+                ctx.globalAlpha = particle.life;
+                ctx.fillStyle = particle.color;
+                ctx.shadowColor = particle.color;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // 主动画循环
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // 更新和绘制爱心
+                hearts.forEach(heart => {
+                    heart.x += heart.speedX;
+                    heart.y += heart.speedY;
+                    heart.rotation += heart.rotationSpeed;
+                    heart.pulse += 0.1;
+                    
+                    // 脉冲效果
+                    const pulseFactor = 1 + Math.sin(heart.pulse) * 0.2;
+                    
+                    // 边界反弹
+                    if (heart.x < 0 || heart.x > canvas.width) heart.speedX *= -0.8;
+                    if (heart.y < 0 || heart.y > canvas.height) heart.speedY *= -0.8;
+                    
+                    drawEnhancedHeart(ctx, heart.x, heart.y, heart.size * pulseFactor, heart.color, heart.opacity, heart.rotation);
+                });
+                
+                // 更新和绘制烟花
+                for (let i = fireworks.length - 1; i >= 0; i--) {
+                    const particle = fireworks[i];
+                    particle.x += particle.vx;
+                    particle.y += particle.vy;
+                    particle.vy += 0.1; // 重力
+                    particle.life -= particle.decay;
+                    
+                    if (particle.life <= 0) {
+                        fireworks.splice(i, 1);
+                    } else {
+                        drawFireworkParticle(ctx, particle);
+                    }
+                }
+                
+                // 随机添加烟花（移动端降频）
+                if (Math.random() < (isMobile ? 0.02 : 0.03)) {
+                    addFirework();
+                }
+                
+                requestAnimationFrame(animate);
+            }
+            
+            // 启动所有效果
+            animate();
+            createFloatingHearts();
+            createStars();
+            
+            // 定期添加更多烟花
+            for (let i = 0; i < 5; i++) {
+                setTimeout(addFirework, i * 500);
+            }
+        }
+
+        // AI文案生成配置
+        const AI_CONFIG = {
+            apiKey: 'sk-0340d946851046c1a0cef9cc7d435276',
+            baseUrl: 'https://api.deepseek.com/v1',
+            model: 'deepseek-chat'
+        };
+
+        // 调用DeepSeek API生成个性化文案
+        async function generateAILoveMessage(name) {
+            const prompt = `为名字"${name}"创作一段浪漫表白文案，要求：融入姓名寓意、风格温馨浪漫、50-80字、包含emoji。直接返回文案即可。`;
+
+            try {
+                const response = await fetch(`${AI_CONFIG.baseUrl}/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${AI_CONFIG.apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: AI_CONFIG.model,
+                        messages: [{ role: 'user', content: prompt }],
+                        temperature: 0.8,
+                        max_tokens: 150
+                    })
+                });
+
+                if (!response.ok) throw new Error('API失败');
+                const data = await response.json();
+                return data.choices[0].message.content.trim();
+            } catch (error) {
+                // 降级到预设模板
+                const templateIndex = name.length % loveTemplates.length;
+                return loveTemplates[templateIndex].replace(/{name}/g, name);
+            }
+        }
+
+        // 一键生成表白体验
+        async function generateLoveMessage() {
+            const name = document.getElementById('nameInput').value.trim();
+            if (!name) {
+                alert('请先输入TA的名字！');
+                return;
+            }
+
+            const messageElement = document.getElementById('loveMessage');
+            const messageText = document.getElementById('messageText');
+            const shareSection = document.getElementById('shareSection');
+            
+            // 显示加载状态
+            messageText.innerHTML = '💕 正在为你创作专属表白... 💕';
+            messageElement.style.display = 'block';
+            
+            // 同时启动特效
+            generateEffect();
+            
+            // 生成文案（AI优先，失败则使用模板）
+            const message = await generateAILoveMessage(name);
+            messageText.textContent = message;
+            shareSection.style.display = 'block';
+        }
+        
+        // 重新生成文案
+        async function regenerateMessage() {
+            const name = document.getElementById('nameInput').value.trim();
+            if (!name) {
+                alert('请先输入TA的名字！');
+                return;
+            }
+            
+            const messageText = document.getElementById('messageText');
+            
+            // 显示重新生成状态
+            messageText.innerHTML = '🔄 正在重新生成更棒的文案... 🔄';
+            
+            // 重新生成AI文案
+            const message = await generateAILoveMessage(name);
+            messageText.textContent = message;
+        }
+
+        // 复制链接功能
+        function copyLink() {
+            const name = document.getElementById('nameInput').value.trim();
+            const url = `${window.location.href}?name=${encodeURIComponent(name)}`;
+            
+            navigator.clipboard.writeText(url).then(() => {
+                alert('链接已复制到剪贴板！');
+            }).catch(() => {
+                alert('复制失败，请手动复制链接');
+            });
+        }
+
+        // 保存为图片功能
+        async function saveAsImage() {
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 1200;
+                canvas.height = 800;
+                
+                // 绘制背景渐变
+                const gradient = ctx.createRadialGradient(600, 400, 0, 600, 400, 600);
+                gradient.addColorStop(0, '#ff6b9d');
+                gradient.addColorStop(0.3, '#c44569');
+                gradient.addColorStop(0.7, '#6c5ce7');
+                gradient.addColorStop(1, '#a29bfe');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 1200, 800);
+                
+                // 添加星星背景
+                ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                for (let i = 0; i < 50; i++) {
+                    const x = Math.random() * 1200;
+                    const y = Math.random() * 800;
+                    const size = Math.random() * 3 + 1;
+                    ctx.beginPath();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // 绘制标题
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 60px Arial';
+                ctx.textAlign = 'center';
+                ctx.shadowColor = 'rgba(255,107,157,0.8)';
+                ctx.shadowBlur = 20;
+                ctx.fillText('💕 LoveWords 💕', 600, 120);
+                
+                // 绘制姓名
+                const name = document.getElementById('nameInput').value.trim();
+                if (name) {
+                    ctx.font = 'bold 48px Arial';
+                    ctx.fillText(`专属于 ${name} 的表白`, 600, 200);
+                }
+                
+                // 绘制文案
+                const messageText = document.getElementById('messageText').textContent;
+                if (messageText && messageText !== '💕 正在为你创作专属表白... 💕') {
+                    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+                    ctx.fillRect(150, 280, 900, 200);
+                    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(150, 280, 900, 200);
+                    
+                    ctx.fillStyle = '#333';
+                    ctx.font = '28px Arial';
+                    ctx.shadowBlur = 0;
+                    
+                    // 文本换行处理
+                    const words = messageText.split('');
+                    let line = '';
+                    let y = 330;
+                    const maxWidth = 800;
+                    
+                    for (let i = 0; i < words.length; i++) {
+                        const testLine = line + words[i];
+                        const metrics = ctx.measureText(testLine);
+                        
+                        if (metrics.width > maxWidth && line !== '') {
+                            ctx.fillText(line, 600, y);
+                            line = words[i];
+                            y += 35;
+                        } else {
+                            line = testLine;
+                        }
+                    }
+                    ctx.fillText(line, 600, y);
+                }
+                
+                // 绘制爱心装饰
+                const color = generateColor(name || 'love');
+                ctx.fillStyle = color;
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 15;
+                
+                for (let i = 0; i < 20; i++) {
+                    const x = Math.random() * 1200;
+                    const y = Math.random() * 800;
+                    const size = Math.random() * 20 + 10;
+                    drawHeartOnCanvas(ctx, x, y, size);
+                }
+                
+                // 下载图片
+                const link = document.createElement('a');
+                link.download = `LoveWords_${name || 'love'}_${new Date().getTime()}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+                
+            } catch (error) {
+                alert('图片生成失败，请稍后再试');
+            }
+        }
+        
+        // 在Canvas上绘制爱心
+        function drawHeartOnCanvas(ctx, x, y, size) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(size / 20, size / 20);
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(-10, -10, -20, 0, -10, 10);
+            ctx.bezierCurveTo(0, 20, 0, 20, 0, 20);
+            ctx.bezierCurveTo(0, 20, 0, 20, 10, 10);
+            ctx.bezierCurveTo(20, 0, 10, -10, 0, 0);
+            ctx.fill();
+            ctx.restore();
+        }
+        
+
+
+
+
+        // 页面加载时检查URL参数
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const name = urlParams.get('name');
+            if (name) {
+                document.getElementById('nameInput').value = name;
+                generateLoveMessage();
+            }
+            
+            // 初始化背景星星
+            createStars();
+        };
+
+        // 响应式画布调整和性能优化
+        let resizeTimeout;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const canvas = document.getElementById('effectCanvas');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }, 100);
+        });
+        
+        // 移动端触摸优化
+        document.addEventListener('touchstart', function(e) {
+            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'BUTTON') {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        // 性能监控
+        let lastTime = 0;
+        let fps = 60;
+        function updateFPS(currentTime) {
+            fps = 1000 / (currentTime - lastTime);
+            lastTime = currentTime;
+            if (fps < 30) {
+                const canvas = document.getElementById('effectCanvas');
+                if (canvas) {
+                    const ctx = canvas.getContext('2d');
+                    ctx.globalAlpha = 0.8;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
